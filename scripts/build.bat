@@ -5,5 +5,7 @@ javac client/*.java -d ../out
 javac server/*.java -d ../out
 javac common/*.java -d ../out
 cd ..\out
-jar cfe server.jar server.Server *
-jar cfe client.jar client.Client *
+rmdir /q /s ..\artifacts
+mkdir ..\artifacts
+jar cfe ../artifacts/server.jar server.Server *
+jar cfe ../artifacts/client.jar client.Client *
