@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class Server {
     public static final String serverName = "System";
@@ -164,6 +165,8 @@ public class Server {
                     broadcastMessage(((LoginMessage) message).buildSystemNotification());
                 } else if (message instanceof HistoryMessage) {
                     sendHistory(key);
+                }else if (message instanceof OnlineMessage) {
+                    sendOnline(key);
                 } else if (message instanceof FileMessage) {
                     FileMessage fileMessage = (FileMessage) message;
                     if (fileMessage.isUploadRequest()) {
@@ -184,6 +187,14 @@ public class Server {
             e.printStackTrace();
             cleanupClientConnection(key, client);
         }
+    }
+
+    private void sendOnline(SelectionKey key) {
+        String answer = clients.stream()
+                .filter((it) -> it.attachment() instanceof String)
+                .map((it) -> (String) it.attachment())
+                .collect(Collectors.joining("\n"));
+        sendMessage(key, new TextMessage(answer, serverName));
     }
 
     private void sendNoFileError(SelectionKey key) {
@@ -287,6 +298,8 @@ public class Server {
             return FileMessage.parse(text, (String) key.attachment());
         } else if (text.startsWith("/download")) {
             return FileMessage.parseDownloadRequest(text, serverName);
+        }else if (text.startsWith("/online")) {
+            return new OnlineMessage(((String) key.attachment()));
         } else {
             return new TextMessage(text, ((String) key.attachment()));
         }

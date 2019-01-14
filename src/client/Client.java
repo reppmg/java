@@ -74,6 +74,7 @@ public class Client {
         System.out.println("/file - upload file");
         System.out.println("/download {file id} - downloads file by id");
         System.out.println("/history - prints message history");
+        System.out.println("/online - prints users online");
     }
 
     /**
