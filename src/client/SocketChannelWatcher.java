@@ -59,7 +59,7 @@ public class SocketChannelWatcher {
                         continue;
                     }
 
-                    String message = new String(buffer.array(), StandardCharsets.UTF_8);
+                    String message = new String(buffer.array(), StandardCharsets.UTF_8).replace("\u0000", "");
                     System.out.print(message);
                     Arrays.fill(buffer.array(), (byte) 0);
                     buffer.clear();
