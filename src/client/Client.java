@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Client class for the app
@@ -39,6 +41,7 @@ public class Client {
 
     /**
      * Runs the app
+     *
      * @throws IOException if connection to server is impossible
      */
     private void run() throws IOException {
@@ -79,6 +82,7 @@ public class Client {
 
     /**
      * requests file download from server
+     *
      * @param message with /file command
      * @throws IOException when server is unavailable
      */
@@ -93,6 +97,7 @@ public class Client {
 
     /**
      * starts upload file to server
+     *
      * @throws IOException when server is unavailable
      */
     private void startFileSequence() throws IOException {
@@ -103,8 +108,23 @@ public class Client {
             System.out.println(String.format("%d: %s", index++, file.toAbsolutePath()));
         }
         Scanner scanner = new Scanner(System.in);
-        int fileNum = scanner.nextInt() - 1;
-        if (fileNum == -1) return;
+        int fileNum = -2;
+        while (fileNum < 0 || fileNum >= files.size()){
+            try {
+                fileNum = scanner.nextInt() - 1;
+                if (fileNum == -1) {
+                    System.out.println("Exiting file menu");
+                    return;
+                }
+                if (fileNum < 0 || fileNum >= files.size()) {
+                    System.out.println("Cannot file with this index. (0 for exit)");
+                }
+            } catch (Exception e) {
+                System.out.println("Error! Enter number. (0 for exit)");
+                if (scanner.hasNext()) scanner.nextLine();
+            }
+        }
+
         Path selectedFilePath = files.get(fileNum);
         SocketChannel fileSocket = SocketChannel.open(remote);
         new Thread(new FileUploadTask(fileSocket, selectedFilePath, name)).start();
@@ -112,7 +132,6 @@ public class Client {
     }
 
     /**
-     *
      * @param message to be sent to server
      */
     private void sendMessage(String message) {
