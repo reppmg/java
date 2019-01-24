@@ -101,6 +101,7 @@ public class Client {
      * @throws IOException when server is unavailable
      */
     private void startFileSequence() throws IOException {
+        int userExitInput = -1;
         List<Path> files = FileWatcher.getFiles();
         int index = 1;
         System.out.println("Chose file (0 for exit):");
@@ -108,15 +109,15 @@ public class Client {
             System.out.println(String.format("%d: %s", index++, file.toAbsolutePath()));
         }
         Scanner scanner = new Scanner(System.in);
-        int fileNum = -2;
-        while (fileNum < 0 || fileNum >= files.size()){
+        int selectedFileIndex = -2; //init with negative to start cycle
+        while (selectedFileIndex < 0 || selectedFileIndex >= files.size()) {
             try {
-                fileNum = scanner.nextInt() - 1;
-                if (fileNum == -1) {
+                selectedFileIndex = scanner.nextInt() - 1;
+                if (selectedFileIndex == userExitInput) {
                     System.out.println("Exiting file menu");
                     return;
                 }
-                if (fileNum < 0 || fileNum >= files.size()) {
+                if (selectedFileIndex < 0 || selectedFileIndex >= files.size()) {
                     System.out.println("Cannot file with this index. (0 for exit)");
                 }
             } catch (Exception e) {
@@ -125,7 +126,7 @@ public class Client {
             }
         }
 
-        Path selectedFilePath = files.get(fileNum);
+        Path selectedFilePath = files.get(selectedFileIndex);
         SocketChannel fileSocket = SocketChannel.open(remote);
         new Thread(new FileUploadTask(fileSocket, selectedFilePath, name)).start();
         System.out.println("upload started: " + selectedFilePath.toAbsolutePath());

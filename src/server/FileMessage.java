@@ -10,6 +10,7 @@ import java.nio.file.Path;
  * command syntax is: /file "filename"userName
  */
 public class FileMessage extends Message {
+    public static final int MINIMUM_COMMAND_LENGTH = 7;
     /**
      * file id. File is accessed by clients by id
      */
@@ -49,7 +50,7 @@ public class FileMessage extends Message {
      * @throws InvalidFormatException when command has invalid format
      */
     public static FileMessage parse(String text, String author) throws InvalidFormatException {
-        if (text.length() < 7) throw new InvalidFormatException(author);
+        if (text.length() < MINIMUM_COMMAND_LENGTH) throw new InvalidFormatException(author);
         int firstQuoteIndex = text.indexOf("\"");
         boolean uploadRequest = firstQuoteIndex != -1;
         String fileName;

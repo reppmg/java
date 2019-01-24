@@ -62,7 +62,6 @@ public class Server {
         while (true) {
             int readyCount = selector.select();
             if (readyCount == 0) {
-//                sendPendingMessages();
                 continue;
             }
 
@@ -91,7 +90,8 @@ public class Server {
 
     /**
      * sends message to client
-     * @param key client's key
+     *
+     * @param key     client's key
      * @param message message to be sent
      */
     private void sendMessage(SelectionKey key, Message message) {
@@ -117,6 +117,7 @@ public class Server {
 
     /**
      * registers client
+     *
      * @param key clients {@link SelectionKey}
      */
     private void acceptConnection(SelectionKey key) {
@@ -136,11 +137,13 @@ public class Server {
 
     /**
      * reads message from key
+     *
      * @param key client's {@link SelectionKey}
      */
     private void readMessage(SelectionKey key) {
         logDebug("reading message from " + key.attachment());
-        int BUFFER_SIZE = 1024;
+        int MAX_MESSAGE_LENGTH = 100;
+        final int BUFFER_SIZE = 1024;
         SocketChannel client = (SocketChannel) key.channel();
         ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
         try {
@@ -156,7 +159,7 @@ public class Server {
                 fileSaver.save(buffer);
             } else {
                 String text = new String(buffer.array());
-                logDebug(text.substring(0, Math.min(100, text.length() - 1)));
+                logDebug(text.substring(0, Math.min(MAX_MESSAGE_LENGTH, text.length() - 1)));
                 Message message = parseMessage(text, key);
                 if (message instanceof TextMessage) {
                     history.add(message);
@@ -165,7 +168,7 @@ public class Server {
                     broadcastMessage(((LoginMessage) message).buildSystemNotification());
                 } else if (message instanceof HistoryMessage) {
                     sendHistory(key);
-                }else if (message instanceof OnlineMessage) {
+                } else if (message instanceof OnlineMessage) {
                     sendOnline(key);
                 } else if (message instanceof FileMessage) {
                     FileMessage fileMessage = (FileMessage) message;
@@ -207,7 +210,8 @@ public class Server {
 
     /**
      * initiates file upload from client
-     * @param key client
+     *
+     * @param key         client
      * @param fileMessage file command wrapper
      * @throws IOException file is unavailable
      */
@@ -222,6 +226,7 @@ public class Server {
 
     /**
      * Broadcasts message to all logged in clients
+     *
      * @param text message to be sent
      */
     private void broadcast(String text) {
@@ -232,6 +237,7 @@ public class Server {
 
     /**
      * Broadcasts message to all logged in clients
+     *
      * @param textMessage message to be sent
      */
     private void broadcastMessage(TextMessage textMessage) {
@@ -242,7 +248,8 @@ public class Server {
 
     /**
      * closes connections after client disconnected
-     * @param key client's {@link SelectionKey}
+     *
+     * @param key    client's {@link SelectionKey}
      * @param client key's channel
      */
     private void cleanupClientConnection(SelectionKey key, SocketChannel client) {
@@ -257,6 +264,7 @@ public class Server {
 
     /**
      * broadcasts disconnect message or finishes file upload
+     *
      * @param key disconnected one
      */
     private void channelDisconnected(SelectionKey key) {
@@ -273,6 +281,7 @@ public class Server {
 
     /**
      * sends message history
+     *
      * @param key client
      */
     private void sendHistory(SelectionKey key) {
@@ -281,11 +290,12 @@ public class Server {
 
     /**
      * parses message
+     *
      * @param text raw message
-     * @param key client
+     * @param key  client
      * @return message wrapper object
      * @throws InvalidFormatException when command has invalid format
-     * @throws FileNotFoundException when file command contains file that not exists
+     * @throws FileNotFoundException  when file command contains file that not exists
      */
     private Message parseMessage(String text, SelectionKey key) throws InvalidFormatException, FileNotFoundException {
         if (text.startsWith("/login")) {
@@ -298,7 +308,7 @@ public class Server {
             return FileMessage.parse(text, (String) key.attachment());
         } else if (text.startsWith("/download")) {
             return FileMessage.parseDownloadRequest(text, serverName);
-        }else if (text.startsWith("/online")) {
+        } else if (text.startsWith("/online")) {
             return new OnlineMessage(((String) key.attachment()));
         } else {
             return new TextMessage(text, ((String) key.attachment()));
@@ -307,7 +317,8 @@ public class Server {
 
     /**
      * Broadcasts message to all logged clients except one
-     * @param key exception client
+     *
+     * @param key         exception client
      * @param textMessage message to be sent
      */
     private void broadcastExcept(SelectionKey key, TextMessage textMessage) {
@@ -322,6 +333,7 @@ public class Server {
 
     /**
      * defines should the channel be closed
+     *
      * @param numReadBytes read bytes from the channel
      * @return should close this channel
      */
